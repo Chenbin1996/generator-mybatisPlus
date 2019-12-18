@@ -1,0 +1,211 @@
+<style>
+    .contain{
+        padding: 20px;
+    }
+    .layui-form-pane .layui-form-label{
+        margin-left: 160px;
+    }
+    .layui-form-pane .layui-input-block{
+        margin-left: 160px;
+    }
+
+
+
+    .table-bordered {
+        border-color: lightgray;
+    }
+    .table-bordered > tbody > tr > td {
+        border-color: lightgray;
+        line-height: 34px!important;
+    }
+    .table-bordered > thead > tr > th {
+        border-color: lightgray;
+    }
+    #table,#key{
+        height: 34px;
+        line-height: 34px;
+        width: 160px;
+    }
+    #type{
+        height: 36px;
+        line-height: 36px;
+        width: 120px;
+    }
+    .ng-cloak{
+        display: none;
+    }
+    .foot{
+        padding-top: 20px;
+        margin-top: 20px;
+        border-top: 1px solid lightblue;
+    }
+    
+    
+    option {
+        font-weight: normal;
+        display: block;
+        white-space: pre;
+        min-height: 1.2em;
+        padding: 0px 2px 1px;
+    }
+    .codeDownload-panel .layui-form-label{
+        width: 100px;
+    }
+    .codeDownload-panel .layui-input-inline{
+        width: 60%
+    }
+
+</style>
+
+<div class="contain" ng-controller="codeDownload" ng-init="init()" ng-cloak class="ng-cloak">
+    <div ng-if="status">
+        <form class="layui-form" action="" style="border-bottom: 1px solid lightblue;margin-bottom: 10px;">
+            <div class="codeDownload-panel">
+                <div class="layui-row layui-col-space5">
+                    <div class="layui-col-md4">
+                        <div class="grid-demo grid-demo-bg1">
+                            <label class="layui-form-label">创建人</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="phone" lay-verify="required" autocomplete="off" class="layui-input" ng-model="$parent.creater" placeholder="author" ng-blur="checkCreater()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md4">
+                        <div class="grid-demo grid-demo-bg1">
+                            <label class="layui-form-label">项目名称</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="email" lay-verify="required" autocomplete="off" class="layui-input" ng-model="$parent.fileName" placeholder="如：demo">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="layui-col-md4">
+                        <div class="grid-demo grid-demo-bg1">
+                            <label class="layui-form-label">文件包名</label>
+                            <div class="layui-input-inline">
+                                <input type="text" name="email" lay-verify="required" autocomplete="off" class="layui-input" ng-model="$parent.creatName" placeholder="如：com.example.demo">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="layui-row layui-col-space5">
+                    <div class="layui-col-md4">
+                        <label class="layui-form-label">项目类型</label>
+                        <div class="layui-input-inline">
+                            <select ng-model="$parent.type" id="type" style="display: inline-block" lay-verify="required" >
+                                <option value="">请选择</option>
+                                <option ng-repeat="i in typeList">{{i}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+         		
+         		 <div class="layui-form-item" style="display: none;" >
+	                <button id="checkfrom" class="layui-btn" type="button" lay-submit="" lay-filter="demo2"  style="margin-left: 366px;"></button>
+	          	  </div>
+         		
+            </div>
+        </form>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th >序号</th>
+                <th >表名 <span style="color: red">*</span></th>
+                <th >类名</th>
+                <th >主键类型 <span style="color: red">*</span></th>
+                <th >描述 <span style="color: red">*</span></th>
+                <th >操作</th>
+            </tr>
+            </thead>
+            <tbody class="tableList">
+                <tr ng-repeat="x in arrNames">
+                    <td>{{$index+1}}</td>
+                    <td>
+                        <select id="table" ng-model="x.ms" ng-change="valueChange(x.ms,x)"
+                        	ng-options="i.tableName for i in tableList">
+                            <option value="">请选择</option>
+                        </select>
+                    </td>
+                    <td><input type="text" style="height: 34px;padding: 0 6px;" ng-model="x.domainName"></td>
+                    <td>
+                        <select id="key" ng-model="x.pkDataType">
+                            <option value="">请选择</option>
+                            <option value="Integer" selected="{{'Integer'==x.jdbcType}}">int自增</option>
+                            <option value="String" selected="{{'String'==x.jdbcType}}">UUID</option>
+                            <option value="Long" selected="{{'Long'==x.jdbcType}}">bigint</option>
+                        </select>
+                    </td>
+                    <td><input type="text" style="height: 34px;padding: 0 6px;" ng-model="x.description"></td>
+                    <td>
+                        <a class="btn btn-primary btn-xs" ng-click="delete($index)"><i class="fa fa-trash-o" title="删除"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="layui-btn layui-btn-normal" ng-click="tableShow()">+</button>
+        <div class="foot ">
+            <button class="layui-btn" ng-click="save()">代码生成</button>
+        </div>
+
+    </div>
+    <div ng-if="!status">
+        数据库还未连接......
+    </div>
+
+    <!--选择表模态框-->
+    <div class="modal fade" id="table_ztree" role="dialog_region" data-backdrop="static">
+        <div class="modal-dialog water_dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title">选择所需的表</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="input-group">
+                        <input type="text" ng-model="tableName" class="form-control" placeholder="请输入表名称">
+                        <span class="input-group-btn">
+			        						<button class="btn btn-default" type="button"
+                                                    ng-click="select_table()">查询</button>
+			        					</span>
+                    </div>
+                    <div>
+                        <div class="table-responsive" style="height: 300px;overflow: hidden;overflow-y: scroll;">
+                            <form id="tableForm">
+                                <table class="table table-bordered table-hover">
+                                    <thead>
+                                    <tr>
+                                        <th>序号</th>
+                                        <th>数据库表名称</th>
+                                        <th>选中</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr ng-repeat="table in tableList | filter:{catchment:selectedCatchment}"
+                                        ng-init="index=$index+1">
+                                        <td>{{$index+1}}</td>
+                                        <td>{{table.tableName}}</td>
+                                        <td>
+                                            <input type="checkbox" name="patrol_table" ng-value="table.name"
+                                                   ng-model="checkedTable" ng-click="selectedTable(table)"/>
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <a href="javascript:;" class="btn btn-primary btn-o" ng-click="cancel()">
+                        <i class="fa fa-repeat"></i>
+                        <span>取消选择</span>
+                    </a>
+                    <a href="javascript:;" class="btn btn-primary btn-o" ng-click="table_modalOk()">
+                        <i class="fa fa-check"></i>
+                        <span>确 定</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,82 @@
+#questionnaire_option{
+  position : absolute;	
+  left: 50%;
+  margin: 0 auto;
+  display: inline-block;
+}
+.tab-content{
+	padding: 20px;
+}
+.title{
+	text-align: center;
+}
+.input-group{
+	margin-bottom: 10px;
+}
+.selections input{
+	margin-bottom: 10px;
+}
+.checkboxs{
+	margin-top: 40px;
+	font-size: 16px;
+}
+.selects span{
+	display: inline-block;
+}
+.question{
+	padding-bottom: 20px;
+	position: relative;
+}
+.question_edit{
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 100%;
+	height: 100%;
+	border: 1px solid #333;
+	display: none;
+}
+.question:hover .question_edit{
+	display: block;
+}
+.question_edit div{
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+}
+.question_edit div ul li{
+	list-style: none;
+	float: right;
+	margin:0 20px;
+}
+.question_edit div ul{
+	margin-right: 60px;
+	/*float: right;*/
+}
+.qstitle{
+	position: relative;
+}
+.qsedit{
+	width: 100%;
+	height: 100%;
+	display: none;
+	position: absolute;
+	top:0;
+	left:0;
+	border: 1px solid #333;
+}
+.qstitle:hover .qsedit{
+	display: block;
+	
+}
+.qsedit div{
+	width:100%;
+	position: absolute;
+	bottom: 0;
+}
+.qsedit ul{
+	width:100%;
+}
+.qsedit ul li{
+	float: right;
+}

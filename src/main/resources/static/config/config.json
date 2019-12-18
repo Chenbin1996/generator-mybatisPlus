@@ -1,0 +1,50 @@
+{
+	"moduleId": "55d7bde1ba2e11e7a0e6ac1f6b182e9e",
+	"moduleName": "代码生成器",
+	"version": "V100R001C00",
+	"type":"1",
+	"menus": [
+		{
+			"seqId": "1",
+			"parentId": "0",
+			"isLeaf":false,
+			"isRoot":true,
+			"name": "代码生成器",
+			"icon": "icon-settings glyphicon-stats icon text-info-dker",
+			"url": "",
+			"requireJS":[],
+			"description": "一级菜单-代码生成器"
+		}, {
+			"seqId": "2",
+			"parentId": "1",
+			"isLeaf":true,
+			"isRoot":false,
+			"name": "连接数据库",
+			"icon": "icon-settings glyphicon-stats icon text-info-dker",
+			"url": "tpl/dataBaseLine/dataBase_line.html",
+			"requireJS":["js/controllers/dataBaseLine/dataBase_line.js"],
+			"description": "二级菜单-连接数据库"
+		}, {
+			"seqId": "3",
+			"parentId": "1",
+			"isLeaf":true,
+			"isRoot":false,
+			"name": "代码生成",
+			"icon": "icon-settings glyphicon-stats icon text-info-dker",
+			"url": "tpl/codeDownload/codeDownload.html",
+			"requireJS":["js/controllers/codeDownload/code_download.js"],
+			"description": "二级菜单-代码生成"
+		}
+	],
+	"components": [
+	],
+	"pages":[
+	   	{
+			"seqId": "501",
+			"name": "数据库列表",
+			"url": "tpl/dataBaseLine/dataBase_list.html",
+			"requireJS":["js/controllers/dataBaseLine/dataBase_list.js"],
+			"description": "数据库列表"
+		}
+	]
+}

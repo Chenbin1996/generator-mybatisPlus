@@ -1,0 +1,126 @@
+<style>
+    .contain{
+        position: relative;
+        width: 100%;
+        padding: 20px;
+    }
+    .layui-form-pane .layui-form-label{
+        width: 160px;
+    }
+    .layui-form-pane .layui-input-block{
+        margin-left: 160px;
+    }
+    .layui-form-item .layui-input-inline{
+        width: 300px;
+    }
+    .layui-form-item .layui-inline{
+        width: 400px;
+    }
+
+
+    .table{
+        border-bottom:1px solid lightblue;
+        border-right:1px solid lightblue;
+    }
+    .table_header{
+        background: #fff3f3;
+    }
+    .table ul{
+        padding: 0;
+    }
+    .table ul li{
+        border-top:1px solid lightblue;
+        border-left:1px solid lightblue;
+        text-align: center;
+        padding: 0 20px;
+        height: 40px;
+        line-height: 40px;
+        font-size: 14px;
+    }
+
+</style>
+
+<div class="contain" ng-controller="dataBase_line" ng-init="init()">
+    <div class="tab_contain1" ng-show="!status">
+        <form class="layui-form layui-form-pane" action="">
+            <div class="layui-form-item">
+                <div class="checkbox">
+                    <div class="layui-inline">
+                        <label class="layui-form-label">数据库类型</label>
+                        <div class="layui-input-inline dataBase" style="margin-right: 0;width: 200px;">
+                            <select name="quiz" class="quiz" ng-model="dbType">
+                                <option value="">请选择</option>
+                                <option value="mysql">mysql</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">主机或IP地址名</label>
+                <div class="layui-input-inline" style="position: relative;">
+                    <input type="text" id="url" lay-verify="required" placeholder="请输入主机或IP地址名" autocomplete="off" class="layui-input" ng-model="url">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">端口号</label>
+                <div class="layui-input-inline" style="position: relative;">
+                    <input type="text" id="port" lay-verify="required" placeholder="请输入端口号" autocomplete="off" class="layui-input" ng-model="port">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">用户名</label>
+                <div class="layui-input-inline" style="position: relative;">
+                    <input type="text" id="user" lay-verify="required" placeholder="请输入用户名" autocomplete="off" class="layui-input" ng-model="user">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">密码</label>
+                <div class="layui-input-inline" style="position: relative;">
+                    <input type="text" id="passWord" lay-verify="required" placeholder="请输入密码" autocomplete="off" class="layui-input" ng-model="passWord">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <label class="layui-form-label">Schema/数据库</label>
+                <div class="layui-input-inline">
+                    <input type="text" id="dataBase" lay-verify="required" autocomplete="off" placeholder="请输入Schema/数据库" class="layui-input" ng-model="dataBase">
+                </div>
+            </div>
+            <div class="layui-form-item">
+                <!--<button class="layui-btn layui-btn-primary" lay-submit="" lay-filter="demo2">测试连接</button>
+                <button class="layui-btn layui-btn-primary" lay-submit="" lay-filter="demo2" style="margin-left: 210px;">取消</button>-->
+                <button class="layui-btn" type="button" lay-submit="" lay-filter="demo2" ng-click="toConnect()" style="margin-left: 366px;">测试连接</button>
+            </div>
+        </form>
+    </div>
+    <div class="tab_contain2" ng-show="status">
+        <form class="layui-form" action="" lay-filter="example">
+            <div class="layui-form-item">
+                <div class="layui-inline">
+                    <label class="layui-form-label">表名</label>
+                    <div class="layui-input-inline">
+                        <select name="modules" lay-verify="required">
+                            <option value="">直接选择</option>
+                            <option ng-repeat="item in dataBaseList" value="{{$index}}">{{item}}</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="layui-btn layui-btn-normal" type="button" style="float: right" ng-click="reLine()">重新连接</button>
+            </div>
+        </form>
+        <div class="table clearfix">
+            <ul class="col-sm-4">
+                <li class="table_header">字段名称</li>
+                <li ng-repeat="i1 in detailData.columnNames track by $index">{{i1}}</li>
+            </ul>
+            <ul class="col-sm-4">
+                <li class="table_header">字段类型</li>
+                <li ng-repeat="i2 in detailData.columnTypes track by $index">{{i2}}</li>
+            </ul>
+            <ul class="col-sm-4">
+                <li class="table_header">字段注解</li>
+                <li ng-repeat="i3 in detailData.ColumnComments track by $index">{{i3}}</li>
+            </ul>
+        </div>
+    </div>
+</div>
