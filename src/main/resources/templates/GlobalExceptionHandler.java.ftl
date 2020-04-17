@@ -41,7 +41,7 @@ public class GlobalExceptionHandler extends AbstractErrorController {
     }
 
     @Value("${server.error.path:${error.path:/error}}")
-    private static String errorPath = "/error";
+    private String errorPath = "/error";
 
 
     /**
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler extends AbstractErrorController {
     @ExceptionHandler(Exception.class)
     public Result<String> serverError(HttpServletRequest req, HttpServletResponse rsp, Exception ex) throws Exception {
         LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex);
-        return ResponseMsgUtil.builderResponse(1002, ex == null ? null : ex.getMessage(), null);
+        return ResponseMsgUtil.builderResponse(500, ex == null ? null : ex.getMessage(), null);
     }
 
 
@@ -91,16 +91,16 @@ public class GlobalExceptionHandler extends AbstractErrorController {
     @ResponseBody
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
-    public Result<String> notFound(HttpServletRequest request, HttpServletResponse response, Exception ex) throws Exception {
+    public Result<String> notFound(HttpServletRequest request, HttpServletResponse response, NoHandlerFoundException ex) throws Exception {
         LOGGER.error("!!! request uri:{} from {} not found exception:{}", request.getRequestURI(), RequestUtil.getIpAddress(request), ex);
-        return ResponseMsgUtil.builderResponse(404, ex == null ? null : ex.getMessage(), null);
+        return ResponseMsgUtil.builderResponse(404, "找不到地址 " + ex.getRequestURL(), null);
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
     @ResponseBody
     public Result<String> paramException(MissingServletRequestParameterException ex) {
         LOGGER.error("缺少请求参数:{}", ex.getMessage());
-        return ResponseMsgUtil.builderResponse(99999, "缺少参数:" + ex.getParameterName(), null);
+        return ResponseMsgUtil.builderResponse(1002, "缺少参数:" + ex.getParameterName(), null);
     }
 
     //参数类型不匹配
