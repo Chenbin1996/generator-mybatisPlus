@@ -40,7 +40,7 @@ public class GlobalExceptionHandler extends AbstractErrorController {
         super(errorAttributes);
     }
 
-    @Value("${serverErrorPath}}")
+    @Value("${server.error.path:${error.path:/error}}")
     private static String errorPath = "/error";
 
 
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler extends AbstractErrorController {
     @ResponseBody
     @ExceptionHandler(SQLException.class)
     public Result<String> sqlException(HttpServletRequest req, HttpServletResponse rsp, Exception ex) {
-        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex == null ? null : ex);
+        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex);
         return ResponseMsgUtil.builderResponse(1002, ex == null ? null : ex.getMessage(), null);
     }
 
@@ -74,7 +74,7 @@ public class GlobalExceptionHandler extends AbstractErrorController {
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Result<String> serverError(HttpServletRequest req, HttpServletResponse rsp, Exception ex) throws Exception {
-        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex == null ? null : ex);
+        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex);
         return ResponseMsgUtil.builderResponse(1002, ex == null ? null : ex.getMessage(), null);
     }
 
@@ -110,21 +110,22 @@ public class GlobalExceptionHandler extends AbstractErrorController {
     @ResponseBody
     public Result<String> requestTypeMismatch(TypeMismatchException ex) {
         LOGGER.error("参数类型有误:{}", ex.getMessage());
-        return ResponseMsgUtil.builderResponse(99999, "参数类型不匹配,参数" + ex.getPropertyName() + "类型应该为" + ex.getRequiredType(), null);
+        return ResponseMsgUtil.builderResponse(1002, "参数类型不匹配,参数" + ex.getPropertyName() + "类型应该为" + ex.getRequiredType(), null);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
     @ResponseBody
     public Result<String> requestMethod(HttpRequestMethodNotSupportedException ex) {
-        LOGGER.error("请求方式有误：{}", ex.getMethod());
-        return ResponseMsgUtil.builderResponse(99999, "请求方式有误:" + ex.getMethod(), null);
+        String[] supportedMethods = ex.getSupportedMethods();
+        LOGGER.error("请求方式有误，请改为{}", supportedMethods[0]);
+        return ResponseMsgUtil.builderResponse(1002, "请求方式有误，请改为：" + supportedMethods[0], null);
     }
 
     @ExceptionHandler(MultipartException.class)
     @ResponseBody
-    public Result<String> fileSizeLimit(MultipartException m){
+    public Result<String> fileSizeLimit(MultipartException m) {
         LOGGER.error("超过文件上传大小限制");
-        return ResponseMsgUtil.builderResponse(99999,"超过文件大小限制,最大10MB",null);
+        return ResponseMsgUtil.builderResponse(1002, "超过文件大小限制,最大10MB", null);
     }
 
 
@@ -137,13 +138,13 @@ public class GlobalExceptionHandler extends AbstractErrorController {
      * @throws Exception
      */
     @ResponseBody
-    @RequestMapping(value = "${serverErrorPath}}")
+    @RequestMapping(path = "${server.error.path:${error.path:/error}}")
     public Result<String> handleErrors(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HttpStatus status = getStatus(request);
-        if (status == HttpStatus.NOT_FOUND) {
-            throw new NoHandlerFoundException(request.getMethod(),request.getRequestURL().toString(),new HttpHeaders()) ;
-        }
         Map<String, Object> body = getErrorAttributes(request, true);
+        if (status == HttpStatus.NOT_FOUND) {
+            throw new NoHandlerFoundException(request.getMethod(), body.get("path").toString(), new HttpHeaders());
+        }
         return ResponseMsgUtil.builderResponse(Integer.parseInt(body.get("status").toString()), body.get("message").toString(), null);
     }
 
