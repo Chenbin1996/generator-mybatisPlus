@@ -40,34 +40,6 @@ public class GlobalExceptionHandler extends AbstractErrorController {
 
 
     /**
-     * 数据库用户名或密码错误
-     *
-     * @param req
-     * @param rsp
-     * @param ex
-     * @return
-     * @throws Exception
-     */
-    @ExceptionHandler(SqlErrorException.class)
-    public Result<String> sqlErrorException(HttpServletRequest req, HttpServletResponse rsp, Exception ex) {
-        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex == null ? null : ex);
-        return ResponseMsgUtil.builderResponse(1002, ex.getMessage(), null);
-    }
-
-    /**
-     * 代码生成器异常处理
-     * @param req
-     * @param rsp
-     * @param ex
-     * @return
-     */
-    @ExceptionHandler(GeneratorException.class)
-    public Result<String> generatorException(HttpServletRequest req, HttpServletResponse rsp, Exception ex){
-        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex == null ? null : ex);
-        return ResponseMsgUtil.builderResponse(1002, ex.getMessage(), null);
-    }
-
-    /**
      * sql异常
      *
      * @param req
@@ -76,10 +48,11 @@ public class GlobalExceptionHandler extends AbstractErrorController {
      * @return
      * @throws Exception
      */
+    @ResponseBody
     @ExceptionHandler(SQLException.class)
     public Result<String> sqlException(HttpServletRequest req, HttpServletResponse rsp, Exception ex) {
-        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex == null ? null : ex);
-        return ResponseMsgUtil.builderResponse(1002, ex.getMessage(), null);
+        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex);
+        return ResponseMsgUtil.builderResponse(1002, ex == null ? null : ex.getMessage(), null);
     }
 
 
@@ -92,11 +65,12 @@ public class GlobalExceptionHandler extends AbstractErrorController {
      * @return
      * @throws Exception
      */
+    @ResponseBody
     @ResponseStatus(code = HttpStatus.INTERNAL_SERVER_ERROR)
     @ExceptionHandler(Exception.class)
     public Result<String> serverError(HttpServletRequest req, HttpServletResponse rsp, Exception ex) throws Exception {
-        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex == null ? null : ex);
-        return ResponseMsgUtil.exception();
+        LOGGER.error("!!! request uri:{} from {} server exception:{}", req.getRequestURI(), RequestUtil.getIpAddress(req), ex);
+        return ResponseMsgUtil.builderResponse(1002, ex == null ? null : ex.getMessage(), null);
     }
 
 
@@ -109,28 +83,64 @@ public class GlobalExceptionHandler extends AbstractErrorController {
      * @return
      * @throws Exception
      */
+    @ResponseBody
     @ResponseStatus(code = HttpStatus.NOT_FOUND)
     @ExceptionHandler(NoHandlerFoundException.class)
     public Result<String> notFound(HttpServletRequest request, HttpServletResponse response, Exception ex) throws Exception {
         LOGGER.error("!!! request uri:{} from {} not found exception:{}", request.getRequestURI(), RequestUtil.getIpAddress(request), ex);
-        return ResponseMsgUtil.builderResponse(1002, "请求的资源不存在!", null);
+        return ResponseMsgUtil.builderResponse(404, ex == null ? null : ex.getMessage(), null);
     }
 
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    @ResponseBody
+    public Result<String> paramException(MissingServletRequestParameterException ex) {
+        LOGGER.error("缺少请求参数:{}", ex.getMessage());
+        return ResponseMsgUtil.builderResponse(99999, "缺少参数:" + ex.getParameterName(), null);
+    }
+
+    //参数类型不匹配
+    //getPropertyName()获取数据类型不匹配参数名称
+    //getRequiredType()实际要求客户端传递的数据类型
+    @ExceptionHandler(TypeMismatchException.class)
+    @ResponseBody
+    public Result<String> requestTypeMismatch(TypeMismatchException ex) {
+        LOGGER.error("参数类型有误:{}", ex.getMessage());
+        return ResponseMsgUtil.builderResponse(1002, "参数类型不匹配,参数" + ex.getPropertyName() + "类型应该为" + ex.getRequiredType(), null);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
+    public Result<String> requestMethod(HttpRequestMethodNotSupportedException ex) {
+        String[] supportedMethods = ex.getSupportedMethods();
+        LOGGER.error("请求方式有误，请改为{}", supportedMethods[0]);
+        return ResponseMsgUtil.builderResponse(1002, "请求方式有误，请改为：" + supportedMethods[0], null);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    @ResponseBody
+    public Result<String> fileSizeLimit(MultipartException m) {
+        LOGGER.error("超过文件上传大小限制");
+        return ResponseMsgUtil.builderResponse(1002, "超过文件大小限制,最大10MB", null);
+    }
+
+
     /**
-     * 重写/error请求
+     * 重写/error请求, ${server.error.path:${error.path:/error}} IDEA报红无需处理，作用是获取spring底层错误拦截
      *
      * @param request
      * @param response
      * @return
      * @throws Exception
      */
-    @RequestMapping(value = "${server.error.path:${error.path:/error}}")
+    @ResponseBody
+    @RequestMapping(path = "${server.error.path:${error.path:/error}}")
     public Result<String> handleErrors(HttpServletRequest request, HttpServletResponse response) throws Exception {
         HttpStatus status = getStatus(request);
+        Map<String, Object> body = getErrorAttributes(request, true);
         if (status == HttpStatus.NOT_FOUND) {
-            return notFound(request, response, null);
+            throw new NoHandlerFoundException(request.getMethod(), body.get("path").toString(), new HttpHeaders());
         }
-        return ResponseMsgUtil.exception();
+        return ResponseMsgUtil.builderResponse(Integer.parseInt(body.get("status").toString()), body.get("message").toString(), null);
     }
 
 
